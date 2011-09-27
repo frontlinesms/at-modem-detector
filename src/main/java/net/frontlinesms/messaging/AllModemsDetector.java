@@ -5,22 +5,13 @@ import java.util.*;
 
 import serial.*;
 
-/**
- * A commandline utility for detecting connected AT devices.
- * @author Alex Anderson alex@frontlinesms.com
- */
-public class AllModemsDetector {
-	public static void main(String[] args) {
-		SerialClassFactory.init();
-		AllModemsDetector amd = new AllModemsDetector();
-		ATDeviceDetector[] detectors = amd.detectBlocking();
-		printReport(detectors);
-	}
+public class AllModemsDetector {	
 	
+//> INSTANCE PROPERTIES
 	private Logger log = new Logger(getClass());
-	
 	private ATDeviceDetector[] detectors;
-	
+
+//> DETECTION METHODS	
 	/** Trigger detection, and return the results when it is completed. */
 	public ATDeviceDetector[] detectBlocking() {
 		detect();
@@ -46,17 +37,18 @@ public class AllModemsDetector {
 		this.detectors = detectors.toArray(new ATDeviceDetector[0]);
 		log.trace("All detectors started.");
 	}
-	
+
+//> ACCESSORS
 	/** Get the detectors. */
 	public ATDeviceDetector[] getDetectors() {
 		return detectors;
 	}
 	
+//> STATIC HELPER METHODS	
 	/** Blocks until all detectors have completed execution. */
 	private static void waitUntilDetectionComplete(ATDeviceDetector[] detectors) {
-		boolean completed;
+		boolean completed = true;
 		do {
-			completed = true;
 			for (ATDeviceDetector portDetector : detectors) {
 				if(!portDetector.isFinished()) {
 					completed = false;
@@ -64,21 +56,5 @@ public class AllModemsDetector {
 			}
 			Utils.sleep(500);
 		} while(!completed);
-	}
-	
-	/** Prints a report to {@link System#out} detailing the devices that were detected. */
-	private static void printReport(ATDeviceDetector[] completedDetectors) {
-		// All detectors are finished, so print a report
-		for(ATDeviceDetector d : completedDetectors) {
-			System.out.println("---");
-			System.out.println("PORT   : " + d.getPortIdentifier().getName());
-			if(d.isDetected()) {
-				System.out.println("SERIAL : " + d.getSerial());
-				System.out.println("BAUD   : " + d.getMaxBaudRate());
-			} else {
-				System.out.println("DETECTION FAILED");
-				System.out.println("> " + d.getExceptionMessage());
-			}
-		}	
 	}
 }
