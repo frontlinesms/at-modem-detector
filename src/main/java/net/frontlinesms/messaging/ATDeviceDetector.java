@@ -11,16 +11,23 @@ public class ATDeviceDetector extends Thread {
 
 	/** Logger */
 	private final Logger log = new Logger(this.getClass());
+	
+//> DETECTION PROPERTIES
 	/** Port this is detecting on */
 	private final CommPortIdentifier portIdentifier;
 	/** The top speed the device was detected at. */
 	private int maxBaudRate;
-	/** The serial number of the detected device. */
-	private String serial;
 	/** <code>true</code> when the detection thread has finished. */
 	private boolean finished;
 	
 	private String exceptionMessage;
+	
+//> DEVICE PROPERTIES	
+	/** The serial number of the detected device. */
+	private String serial;
+	private String manufacturer;
+	private String model;
+	private String phoneNumber;
 	
 	public ATDeviceDetector(CommPortIdentifier port) {
 		super("ATDeviceDetector: " + port.getName());
@@ -70,6 +77,11 @@ public class ATDeviceDetector extends Thread {
 						maxBaudRate = Math.max(maxBaudRate, baud);
 					}
 				}
+				
+				// detection is complete, so let's try and get the device manufacturer, model and phone number
+				manufacturer = getOptional(in, out, "CGMI");
+				model = getOptional(in, out, "CGMM");
+				phoneNumber = getOptional(in, out, "CNUM");
 			} catch(Exception ex) {
 				log.info("Problem connecting to device.", ex);
 				this.exceptionMessage = ex.getMessage();
@@ -82,6 +94,16 @@ public class ATDeviceDetector extends Thread {
 		}
 		finished = true;
 		log.info("Detection completed on port: " + this.portIdentifier.getName());
+	}
+	
+	/** @return value or <code>null</code> */
+	private String getOptional(InputStream in, OutputStream out, String atCommand) throws IOException {
+		String response = Utils.executeAtCommand(in, out, atCommand, true);
+		if(response.contains("ERROR")) {
+			return null;
+		} else {
+			return response.trim();
+		}
 	}
 	
 //> ACCESSORS

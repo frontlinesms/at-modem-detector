@@ -41,4 +41,26 @@ class Utils {
 	public static final String trimResponse(String command, String response) {
 		return response.replace("OK", "").replace(command, "").trim();
 	}
+
+	/**
+	 * Writes an AT command to the serial driver and retrieves the response.  The supplied
+	 * command will be prepended with "AT+" and appended with a \r.  If requested, any
+	 * presence of the command in the response will be removed.
+	 * @param command
+	 * @param removeCommand If set true, the command is removed from the response.
+	 * @return the response to the issued command
+	 * @throws IOException If there was an issue contacting the serial port
+	 */
+	public static String executeAtCommand(InputStream in, OutputStream out, String command, boolean removeCommand) throws IOException {
+		// Issue the command
+		writeCommand(out, "AT+" + command);
+		String response = readAll(in);
+
+		// If requested, remove the command we issued from the response string
+		if(removeCommand) {
+			response = response.replaceAll("\\s*(AT)?\\+" + command + "\\s*", "");
+		}
+
+		return response;
+	}
 }
