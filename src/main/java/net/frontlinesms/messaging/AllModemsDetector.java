@@ -37,6 +37,12 @@ public class AllModemsDetector {
 		this.detectors = detectors.toArray(new ATDeviceDetector[0]);
 		log.trace("All detectors started.");
 	}
+	
+	public void reset() {
+		if(detectors!=null) for(ATDeviceDetector d : detectors) {
+			d.interrupt();
+		}
+	}
 
 //> ACCESSORS
 	/** Get the detectors. */

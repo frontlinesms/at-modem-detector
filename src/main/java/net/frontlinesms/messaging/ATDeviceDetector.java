@@ -54,7 +54,7 @@ public class ATDeviceDetector extends Thread {
 				// discard all data currently waiting on the input stream
 				Utils.readAll(in);
 				Utils.writeCommand(out, "AT");
-				Utils.sleep(1000);
+				Thread.sleep(1000);
 				String response = Utils.readAll(in);
 				if(!Utils.isResponseOk(response)) {
 					throw new ATDeviceDetectionException("Bad response: " + response);
@@ -82,6 +82,10 @@ public class ATDeviceDetector extends Thread {
 				manufacturer = getOptional(in, out, "CGMI");
 				model = getOptional(in, out, "CGMM");
 				phoneNumber = getOptional(in, out, "CNUM");
+			} catch(InterruptedException ex) {
+				log.info("Detection thread interrupted.", ex);
+				this.exceptionMessage = "Detection interrupted.";
+				break;
 			} catch(Exception ex) {
 				log.info("Problem connecting to device.", ex);
 				this.exceptionMessage = ex.getMessage();
@@ -114,9 +118,13 @@ public class ATDeviceDetector extends Thread {
 	public boolean isDetected() {
 		return this.maxBaudRate > 0;
 	}
-	
+
 	public CommPortIdentifier getPortIdentifier() {
 		return portIdentifier;
+	}
+
+	public String getPortName() {
+		return portIdentifier.getName();
 	}
 	
 	public int getMaxBaudRate() {
@@ -131,5 +139,17 @@ public class ATDeviceDetector extends Thread {
 	public String getExceptionMessage() {
 		assert(!isDetected()) : "Cannot get Throwable clause if device was detected successfully.";
 		return exceptionMessage;
+	}
+
+	public String getManufacturer() {
+		return manufacturer;
+	}
+
+	public String getModel() {
+		return model;
+	}
+		
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
 }
