@@ -27,6 +27,7 @@ public class AllModemsDetector {
 		while(ports.hasMoreElements()) {
 			CommPortIdentifier port = ports.nextElement();
 			if(port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+				log.info("Beginning detection for serial port: " + port.getName());
 				ATDeviceDetector d = new ATDeviceDetector(port);
 				detectors.add(d);
 				d.start();
@@ -42,6 +43,7 @@ public class AllModemsDetector {
 		if(detectors!=null) for(ATDeviceDetector d : detectors) {
 			d.interrupt();
 		}
+		detectors = null;
 	}
 
 //> ACCESSORS
