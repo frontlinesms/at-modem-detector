@@ -1,1 +1,7 @@
+# Maven generated:
 target/
+
+# Eclipse generated:
+.classpath
+.project
+.settings/

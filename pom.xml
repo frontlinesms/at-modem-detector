@@ -132,5 +132,11 @@
 			<version>0.01.01</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.frontlinesms.test</groupId>
+			<artifactId>serial-test</artifactId>
+			<version>0.0.2-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 </project>

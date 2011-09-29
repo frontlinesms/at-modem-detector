@@ -2,6 +2,8 @@ package net.frontlinesms.messaging;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import serial.*;
 
@@ -79,9 +81,9 @@ public class ATDeviceDetector extends Thread {
 				}
 				
 				// detection is complete, so let's try and get the device manufacturer, model and phone number
-				manufacturer = getOptional(in, out, "CGMI");
-				model = getOptional(in, out, "CGMM");
-				phoneNumber = getOptional(in, out, "CNUM");
+				manufacturer = getManufacturer(in, out);
+				model = getModel(in, out);
+				phoneNumber = getPhoneNumber(in, out);
 			} catch(InterruptedException ex) {
 				log.info("Detection thread interrupted.", ex);
 				this.exceptionMessage = "Detection interrupted.";
@@ -100,13 +102,28 @@ public class ATDeviceDetector extends Thread {
 		log.info("Detection completed on port: " + this.portIdentifier.getName());
 	}
 	
+	String getManufacturer(InputStream in, OutputStream out) throws IOException {
+		return getOptional(in, out, "CGMI");
+	}
+
+	String getModel(InputStream in, OutputStream out) throws IOException {
+		return getOptional(in, out, "CGMM");
+	}
+
+	String getPhoneNumber(InputStream in, OutputStream out) throws IOException {
+		String response = getOptional(in, out, "CNUM");
+		Matcher m = Pattern.compile("\\+?\\d+").matcher(response);
+		if(m.find()) return m.group();
+		else return response;
+	}
+	
 	/** @return value or <code>null</code> */
-	private String getOptional(InputStream in, OutputStream out, String atCommand) throws IOException {
+	String getOptional(InputStream in, OutputStream out, String atCommand) throws IOException {
 		String response = Utils.executeAtCommand(in, out, atCommand, true);
 		if(response.contains("ERROR")) {
 			return null;
 		} else {
-			return response.trim();
+			return response.replaceAll("\rOK", "").trim();
 		}
 	}
 	
