@@ -48,25 +48,50 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 	}
 	
 	public void testGetManufacturer() throws Exception {
+		final String[][] testPairs = new String[][] {
+				/* { <modemOutput>, <expectedResponse> } */
+				{ "WAVECOM MODEM\rOK", "WAVECOM MODEM" },
+				{ "huawei\r\n\r\nOK", "huawei" },
+				{ "huawei\r\n\r\nOK\r\n\r\n^RSSI:18", "huawei" },
+		};
+		
+		for(String[] pair : testPairs) {
+			testGetManufacturer(pair[0], pair[1]);
+		}
+	}
+	
+	private void testGetManufacturer(String modemOutput, String expectedResponse) throws Exception {
 		// given
-		in = mockInputStream("WAVECOM MODEM\rOK");
+		in = mockInputStream(modemOutput);
 		
 		// when
-		String response = d.getManufacturer(in, out);
+		String actualResponse = d.getManufacturer(in, out);
 		
 		// then
-		assertEquals("WAVECOM MODEM", response);
+		assertEquals(expectedResponse, actualResponse);
+	}
+	
+	public void testGetModem() throws Exception {
+		final String[][] testPairs = new String[][] {
+				/* { <modemOutput>, <expectedResponse> } */
+				{ "900P\rOK", "900P" },
+				{ "E173\r\n\r\nOK", "E173" },
+		};
+		
+		for(String[] pair : testPairs) {
+			testGetModel(pair[0], pair[1]);
+		}
 	}
 
-	public void testGetModel() throws Exception {
+	private void testGetModel(String modemOutput, String expectedResponse) throws Exception {
 		// given
-		in = mockInputStream("900P\rOK");
+		in = mockInputStream(modemOutput);
 		
 		// when
-		String response = d.getModel(in, out);
+		String actualResponse = d.getModel(in, out);
 		
 		// then
-		assertEquals("900P", response);
+		assertEquals(expectedResponse, actualResponse);
 	}
 	
 	public void testGetPhoneNumber_local() throws Exception {
@@ -89,6 +114,17 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		
 		// then
 		assertEquals("+44712345678", response);
+	}
+	
+	public void testGetPhoneNumber_error() throws Exception {
+		// given
+		in = mockInputStream("ERROR");
+		
+		// when
+		String response = d.getPhoneNumber(in, out);
+		
+		// then
+		assertEquals(null, response);
 	}
 
 	private InputStream mockInputStream(String string) throws UnsupportedEncodingException {

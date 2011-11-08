@@ -99,7 +99,10 @@ public class ATDeviceDetector extends Thread {
 			}
 		}
 		finished = true;
-		log.info("Detection completed on port: " + this.portIdentifier.getName());
+		log.info("Detection completed on port: " + this.portIdentifier.getName() +
+				"; manufacturer: " + manufacturer +
+				"; model: " + model +
+				"; phoneNumber: " + phoneNumber);
 	}
 	
 	String getManufacturer(InputStream in, OutputStream out) throws IOException {
@@ -112,9 +115,13 @@ public class ATDeviceDetector extends Thread {
 
 	String getPhoneNumber(InputStream in, OutputStream out) throws IOException {
 		String response = getOptional(in, out, "CNUM");
-		Matcher m = Pattern.compile("\\+?\\d+").matcher(response);
-		if(m.find()) return m.group();
-		else return response;
+		if(response == null) {
+			return null;
+		} else {
+			Matcher m = Pattern.compile("\\+?\\d+").matcher(response);
+			if(m.find()) return m.group();
+			else return response;
+		}
 	}
 	
 	/** @return value or <code>null</code> */
@@ -122,8 +129,11 @@ public class ATDeviceDetector extends Thread {
 		String response = Utils.executeAtCommand(in, out, atCommand, true);
 		if(response.contains("ERROR")) {
 			return null;
-		} else {
-			return response.replaceAll("\rOK", "").trim();
+		} else {			
+			final String STRIP_REGEX = "(\\s+OK)|" +
+					// RSSI is "received signal strength indicator", and appears to be received unbidden
+					"(\\s+\\^RSSI:\\d+)";
+			return response.replaceAll(STRIP_REGEX, "").trim();
 		}
 	}
 	
