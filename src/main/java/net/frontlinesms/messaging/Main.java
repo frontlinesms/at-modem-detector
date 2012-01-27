@@ -1,8 +1,5 @@
 package net.frontlinesms.messaging;
 
-import java.io.*;
-import java.util.*;
-
 import serial.*;
 
 /**
@@ -11,7 +8,7 @@ import serial.*;
  */
 public class Main {
 	public static void main(String[] args) {
-		SerialClassFactory.init();
+		SerialClassFactory.init(SerialClassFactory.PACKAGE_JAVAXCOMM);
 		AllModemsDetector amd = new AllModemsDetector();
 		ATDeviceDetector[] detectors = amd.detectBlocking();
 		printReport(detectors);

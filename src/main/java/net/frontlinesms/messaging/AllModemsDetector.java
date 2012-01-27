@@ -1,6 +1,5 @@
 package net.frontlinesms.messaging;
 
-import java.io.*;
 import java.util.*;
 
 import serial.*;

@@ -1,7 +1,6 @@
 package net.frontlinesms.messaging;
 
 import java.io.*;
-import java.util.*;
 
 class Utils {
 	/** Calls {@link Thread#sleep(long)} and ignores {@link InterruptedException}s thrown. */

@@ -1,7 +1,6 @@
 package net.frontlinesms.messaging;
 
 import java.io.*;
-import java.util.*;
 
 /** Quick stub of a logger to send things to the command line.  You'll want to replace this with something proper. */
 class Logger {
