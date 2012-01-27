@@ -104,7 +104,7 @@
 		<dependency>
 			<groupId>net.frontlinesms.core</groupId>
 			<artifactId>serial</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<!-- Requires fix found at http://www.slingingsemicolons.com/blogs/dave/maven-and-log4j -->
@@ -135,8 +135,9 @@
 		<dependency>
 			<groupId>net.frontlinesms.test</groupId>
 			<artifactId>serial-test</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>0.0.2</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>
+
