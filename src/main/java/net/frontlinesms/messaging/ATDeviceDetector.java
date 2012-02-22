@@ -7,6 +7,10 @@ import java.util.regex.Pattern;
 import serial.*;
 
 public class ATDeviceDetector extends Thread {
+	private static final String STRIP_REGEX = "(\\s+OK)|" +
+			// RSSI is "received signal strength indicator", and appears to be received unbidden
+			"(\\s+\\^RSSI:\\d+)";
+					
 	/** Valid baud rates */
 	private static final int[] BAUD_RATES = { 9600, 14400, 19200, 28800, 33600, 38400, 56000, 57600, 115200, 230400, 460800, 921600 };
 
@@ -130,7 +134,8 @@ public class ATDeviceDetector extends Thread {
 		if(!response.startsWith("+CPIN: ")) {
 			return "UNKNOWN (" + response + ")";
 		} else {
-			String type = response.substring("+CPIN: ".length()).toUpperCase();
+			String type = response.replaceAll(STRIP_REGEX, "").trim()
+					.substring("+CPIN: ".length()).toUpperCase();
 			if(type.equals("READY")) {
 				return null;
 			} else {
@@ -144,14 +149,11 @@ public class ATDeviceDetector extends Thread {
 		String response = Utils.executeAtCommand(in, out, atCommand, true);
 		if(response.contains("ERROR")) {
 			return null;
-		} else {			
-			final String STRIP_REGEX = "(\\s+OK)|" +
-					// RSSI is "received signal strength indicator", and appears to be received unbidden
-					"(\\s+\\^RSSI:\\d+)";
+		} else {
 			return response.replaceAll(STRIP_REGEX, "").trim();
 		}
 	}
-	
+
 //> ACCESSORS
 	public boolean isFinished() {
 		return finished;

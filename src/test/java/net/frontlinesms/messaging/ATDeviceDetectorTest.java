@@ -75,7 +75,7 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		final String[][] testPairs = new String[][] {
 				/* <modemOutput>, <execptedResult> */
 				{ "+CPIN: READY", null },
-				{ "+CPIN: SIM PIN", "SIM PIN" },
+				{ "+CPIN: SIM PIN\r\n\r\nOK", "SIM PIN" },
 				{ "+CPIN: PUK2", "PUK2" },
 				{ "CMS ERROR: 123", "UNKNOWN (CMS ERROR: 123)" },
 		};
