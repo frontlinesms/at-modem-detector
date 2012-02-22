@@ -29,6 +29,7 @@ public class ATDeviceDetector extends Thread {
 	private String manufacturer;
 	private String model;
 	private String phoneNumber;
+	private String lockType;
 	
 	public ATDeviceDetector(CommPortIdentifier port) {
 		super("ATDeviceDetector: " + port.getName());
@@ -83,6 +84,7 @@ public class ATDeviceDetector extends Thread {
 				manufacturer = getManufacturer(in, out);
 				model = getModel(in, out);
 				phoneNumber = getPhoneNumber(in, out);
+				lockType = getLockType(in, out);
 			} catch(InterruptedException ex) {
 				log.info("Detection thread interrupted.", ex);
 				this.exceptionMessage = "Detection interrupted.";
@@ -120,6 +122,20 @@ public class ATDeviceDetector extends Thread {
 			Matcher m = Pattern.compile("\\+?\\d+").matcher(response);
 			if(m.find()) return m.group();
 			else return response;
+		}
+	}
+	
+	String getLockType(InputStream in, OutputStream out) throws IOException {
+		String response = Utils.executeAtCommand(in, out, "CPIN?", false);
+		if(!response.startsWith("+CPIN: ")) {
+			return "UNKNOWN";
+		} else {
+			String type = response.substring("+CPIN: ".length()).toUpperCase();
+			if(type.equals("READY")) {
+				return null;
+			} else {
+				return type;
+			}
 		}
 	}
 	
@@ -177,5 +193,13 @@ public class ATDeviceDetector extends Thread {
 		
 	public String getPhoneNumber() {
 		return phoneNumber;
+	}
+	
+	public boolean isUnlockRequired() {
+		return lockType != null;
+	}
+	
+	public String getLockType() {
+		return lockType;
 	}
 }

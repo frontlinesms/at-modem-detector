@@ -5,3 +5,6 @@ target/
 .classpath
 .project
 .settings/
+
+# Redcar Editor project files:
+.redcar

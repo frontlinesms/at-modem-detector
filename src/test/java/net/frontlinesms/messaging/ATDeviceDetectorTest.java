@@ -71,6 +71,31 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		assertEquals(expectedResponse, actualResponse);
 	}
 	
+	public void testGetLockType() throws Exception {
+		final String[][] testPairs = new String[][] {
+				/* <modemOutput>, <execptedResult> */
+				{ "+CPIN: READY", null },
+				{ "+CPIN: SIM PIN", "SIM PIN" },
+				{ "+CPIN: PUK2", "PUK2" },
+				{ "CMS ERROR: 123", "UNKNOWN" },
+		};
+				
+		for(String[] pair : testPairs) {
+			testGetLockType(pair[0], pair[1]);
+		}
+	}
+	
+	private void testGetLockType(String modemOutput, String expectedResponse) throws Exception {
+		// given
+		in = mockInputStream(modemOutput);
+		
+		// when
+		String actualResponse = d.getLockType(in, out);
+		
+		// then
+		assertEquals(expectedResponse, actualResponse);
+	}
+	
 	public void testGetModem() throws Exception {
 		final String[][] testPairs = new String[][] {
 				/* { <modemOutput>, <expectedResponse> } */
