@@ -130,12 +130,12 @@ public class ATDeviceDetector extends Thread {
 	}
 	
 	String getLockType(InputStream in, OutputStream out) throws IOException {
-		String response = Utils.executeAtCommand(in, out, "CPIN?", false);
-		if(!response.startsWith("+CPIN: ")) {
-			return "UNKNOWN (" + response + ")";
+		String response = Utils.executeAtCommand(in, out, "CPIN?", true);
+		if(!response.startsWith(": ")) {
+			return "UNKNOWN (" + response.trim() + ")";
 		} else {
 			String type = response.replaceAll(STRIP_REGEX, "").trim()
-					.substring("+CPIN: ".length()).toUpperCase();
+					.substring(": ".length()).toUpperCase();
 			if(type.equals("READY")) {
 				return null;
 			} else {
