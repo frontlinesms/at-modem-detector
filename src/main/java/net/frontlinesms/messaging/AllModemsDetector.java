@@ -8,38 +8,44 @@ public class AllModemsDetector {
 	
 //> INSTANCE PROPERTIES
 	private Logger log = new Logger(getClass());
-	private ATDeviceDetector[] detectors;
+	private Map<String, ATDeviceDetector> detectors;
 
 //> DETECTION METHODS	
 	/** Trigger detection, and return the results when it is completed. */
 	public ATDeviceDetector[] detectBlocking() {
-		detect();
-		waitUntilDetectionComplete(detectors);
+		refresh();
+		waitUntilDetectionComplete();
 		return getDetectors();
 	}
 	
-	/** Trigger detection. */
-	public void detect() {
-		log.trace("Starting device detection...");
-		Set<ATDeviceDetector> detectors = new HashSet<ATDeviceDetector>();
+	/** Trigger detection for fresh ports, and restart any finished detectors. */
+	public synchronized void refresh() {
+		log.trace("Refreshing detectors...");
+		if(detectors == null) {
+			detectors = new HashMap<String, ATDeviceDetector>();
+		}
 		Enumeration<CommPortIdentifier> ports = CommPortIdentifier.getPortIdentifiers();
 		while(ports.hasMoreElements()) {
 			CommPortIdentifier port = ports.nextElement();
 			if(port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-				log.info("Beginning detection for serial port: " + port.getName());
-				ATDeviceDetector d = new ATDeviceDetector(port);
-				detectors.add(d);
-				d.start();
+				ATDeviceDetector d = detectors.get(port.getName());
+				if(d != null && !d.isFinished()) {
+					log.info("Already detecting on port: " + port.getName());
+				} else {
+					log.info("Beginning detection for serial port: " + port.getName());
+					d = new ATDeviceDetector(port);
+					detectors.put(port.getName(), d);
+					d.start();
+				}
 			} else {
 				log.info("Ignoring non-serial port: " + port.getName());
 			}
 		}
-		this.detectors = detectors.toArray(new ATDeviceDetector[0]);
-		log.trace("All detectors started.");
+		log.trace("All detectors refreshed.");
 	}
 	
-	public void reset() {
-		if(detectors!=null) for(ATDeviceDetector d : detectors) {
+	public synchronized void reset() {
+		if(detectors!=null) for(ATDeviceDetector d : getDetectors()) {
 			d.interrupt();
 		}
 		detectors = null;
@@ -47,13 +53,18 @@ public class AllModemsDetector {
 
 //> ACCESSORS
 	/** Get the detectors. */
-	public ATDeviceDetector[] getDetectors() {
-		return detectors;
+	public synchronized ATDeviceDetector[] getDetectors() {
+		if(detectors == null) {
+			return new ATDeviceDetector[0];
+		} else {
+			return detectors.values().toArray(new ATDeviceDetector[detectors.size()]);
+		}
 	}
 	
 //> STATIC HELPER METHODS	
 	/** Blocks until all detectors have completed execution. */
-	private static void waitUntilDetectionComplete(ATDeviceDetector[] detectors) {
+	private void waitUntilDetectionComplete() {
+		ATDeviceDetector[] detectors = getDetectors();
 		boolean completed = true;
 		do {
 			for (ATDeviceDetector portDetector : detectors) {
