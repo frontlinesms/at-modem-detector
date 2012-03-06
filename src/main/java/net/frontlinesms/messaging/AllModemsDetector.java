@@ -10,6 +10,12 @@ public class AllModemsDetector {
 	private Map<String, ATDeviceDetector> detectors;
 	private ATDeviceDetectorListener listener;
 	
+//> CONSTRUCTORS
+	public AllModemsDetector() {}
+	public AllModemsDetector(ATDeviceDetectorListener listener) {
+		setListener(listener);
+	}
+	
 //> ACCESSORS
 	public void setListener(ATDeviceDetectorListener listener) {
 		this.listener = listener;
