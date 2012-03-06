@@ -21,7 +21,7 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		MockSerial.reset();
 		CommPortIdentifier cpi = mock(CommPortIdentifier.class);
 		when(cpi.getName()).thenReturn("/dev/mock");
-		d = new ATDeviceDetector(cpi);
+		d = new ATDeviceDetector(cpi, null);
 		out = mock(OutputStream.class);
 	}
 	
@@ -151,7 +151,8 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		// then
 		assertEquals(null, response);
 	}
-
+	
+//> TEST SETUP METHODS
 	private InputStream mockInputStream(String string) throws UnsupportedEncodingException {
 		return new ByteArrayInputStream(string.getBytes("UTF-8"));
 	}

@@ -20,6 +20,8 @@ public class ATDeviceDetector extends Thread {
 //> DETECTION PROPERTIES
 	/** Port this is detecting on */
 	private final CommPortIdentifier portIdentifier;
+	/** Detection listener */
+	private final ATDeviceDetectorListener listener;
 	/** The top speed the device was detected at. */
 	private int maxBaudRate;
 	/** <code>true</code> when the detection thread has finished. */
@@ -35,9 +37,10 @@ public class ATDeviceDetector extends Thread {
 	private String phoneNumber;
 	private String lockType;
 	
-	public ATDeviceDetector(CommPortIdentifier port) {
+	public ATDeviceDetector(CommPortIdentifier port, ATDeviceDetectorListener listener) {
 		super("ATDeviceDetector: " + port.getName());
 		this.portIdentifier = port;
+		this.listener = listener;
 	}
 	
 	public void run() {
@@ -108,6 +111,7 @@ public class ATDeviceDetector extends Thread {
 				"; manufacturer: " + manufacturer +
 				"; model: " + model +
 				"; phoneNumber: " + phoneNumber);
+		if(listener != null) listener.handleDetectionCompleted(this);
 	}
 	
 	String getManufacturer(InputStream in, OutputStream out) throws IOException {

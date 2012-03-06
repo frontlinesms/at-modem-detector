@@ -4,13 +4,18 @@ import java.util.*;
 
 import serial.*;
 
-public class AllModemsDetector {	
-	
+public class AllModemsDetector {
 //> INSTANCE PROPERTIES
 	private Logger log = new Logger(getClass());
 	private Map<String, ATDeviceDetector> detectors;
+	private ATDeviceDetectorListener listener;
+	
+//> ACCESSORS
+	public void setListener(ATDeviceDetectorListener listener) {
+		this.listener = listener;
+	}
 
-//> DETECTION METHODS	
+//> DETECTION METHODS
 	/** Trigger detection, and return the results when it is completed. */
 	public ATDeviceDetector[] detectBlocking() {
 		refresh();
@@ -33,7 +38,7 @@ public class AllModemsDetector {
 					log.info("Already detecting on port: " + port.getName());
 				} else {
 					log.info("Beginning detection for serial port: " + port.getName());
-					d = new ATDeviceDetector(port);
+					d = new ATDeviceDetector(port, listener);
 					detectors.put(port.getName(), d);
 					d.start();
 				}
