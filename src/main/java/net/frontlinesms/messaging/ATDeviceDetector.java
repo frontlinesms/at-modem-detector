@@ -34,6 +34,7 @@ public class ATDeviceDetector extends Thread {
 	private String serial;
 	private String manufacturer;
 	private String model;
+	private String imsi;
 	private String phoneNumber;
 	private String lockType;
 	
@@ -187,6 +188,10 @@ public class ATDeviceDetector extends Thread {
 	public String getExceptionMessage() {
 		assert(!isDetected()) : "Cannot get Throwable clause if device was detected successfully.";
 		return exceptionMessage;
+	}
+	
+	public String getImsi() {
+		return imsi;
 	}
 
 	public String getManufacturer() {
