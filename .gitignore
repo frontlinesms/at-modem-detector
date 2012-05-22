@@ -8,3 +8,6 @@ target/
 
 # Redcar Editor project files:
 .redcar
+
+# vi temp files
+*.swp

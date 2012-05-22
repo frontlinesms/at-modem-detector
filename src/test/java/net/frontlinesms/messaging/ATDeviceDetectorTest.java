@@ -151,7 +151,65 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		// then
 		assertEquals(null, response);
 	}
-	
+
+	public void testSmsSendSupported_yes() throws Exception {
+		// expect
+		assertTrue(d.isSmsSendSupported("SMS: 0,0,1,0\r\rOK"));
+		assertTrue(d.isSmsSendSupported("SMS: 0,0,1,1\r\rOK"));
+		assertTrue(d.isSmsSendSupported("SMS: 0,1,1,0\r\rOK"));
+		assertTrue(d.isSmsSendSupported("SMS: 0,1,1,1\r\rOK"));
+		assertTrue(d.isSmsSendSupported("SMS: 1,0,1,0\r\rOK"));
+		assertTrue(d.isSmsSendSupported("SMS: 1,0,1,1\r\rOK"));
+		assertTrue(d.isSmsSendSupported("SMS: 1,1,1,0\r\rOK"));
+		assertTrue(d.isSmsSendSupported("SMS: 1,1,1,1\r\rOK"));
+	}
+
+	public void testSmsSendSupported_no() throws Exception {
+		// expect
+		assertFalse(d.isSmsSendSupported("SMS: 0,0,0,0\r\rOK"));
+		assertFalse(d.isSmsSendSupported("SMS: 0,0,0,1\r\rOK"));
+		assertFalse(d.isSmsSendSupported("SMS: 0,1,0,0\r\rOK"));
+		assertFalse(d.isSmsSendSupported("SMS: 0,1,0,1\r\rOK"));
+		assertFalse(d.isSmsSendSupported("SMS: 1,0,0,0\r\rOK"));
+		assertFalse(d.isSmsSendSupported("SMS: 1,0,0,1\r\rOK"));
+		assertFalse(d.isSmsSendSupported("SMS: 1,1,0,0\r\rOK"));
+		assertFalse(d.isSmsSendSupported("SMS: 1,1,0,1\r\rOK"));
+	}
+
+	public void testSmsSendSupported_error() throws Exception {
+		// expect
+		assertFalse(d.isSmsSendSupported("ERROR"));
+	}
+
+	public void testSmsReceiveSupported_yes() throws Exception {
+		// expect
+		assertTrue(d.isSmsReceiveSupported("SMS: 0,1,0,0\r\rOK"));
+		assertTrue(d.isSmsReceiveSupported("SMS: 0,1,0,1\r\rOK"));
+		assertTrue(d.isSmsReceiveSupported("SMS: 0,1,1,0\r\rOK"));
+		assertTrue(d.isSmsReceiveSupported("SMS: 0,1,1,1\r\rOK"));
+		assertTrue(d.isSmsReceiveSupported("SMS: 1,1,0,0\r\rOK"));
+		assertTrue(d.isSmsReceiveSupported("SMS: 1,1,0,1\r\rOK"));
+		assertTrue(d.isSmsReceiveSupported("SMS: 1,1,1,0\r\rOK"));
+		assertTrue(d.isSmsReceiveSupported("SMS: 1,1,1,1\r\rOK"));
+	}
+
+	public void testSmsReceiveSupported_no() throws Exception {
+		// expect
+		assertFalse(d.isSmsReceiveSupported("SMS: 0,0,0,0\r\rOK"));
+		assertFalse(d.isSmsReceiveSupported("SMS: 0,0,0,1\r\rOK"));
+		assertFalse(d.isSmsReceiveSupported("SMS: 0,0,1,0\r\rOK"));
+		assertFalse(d.isSmsReceiveSupported("SMS: 0,0,1,1\r\rOK"));
+		assertFalse(d.isSmsReceiveSupported("SMS: 1,0,0,0\r\rOK"));
+		assertFalse(d.isSmsReceiveSupported("SMS: 1,0,0,1\r\rOK"));
+		assertFalse(d.isSmsReceiveSupported("SMS: 1,0,1,0\r\rOK"));
+		assertFalse(d.isSmsReceiveSupported("SMS: 1,0,1,1\r\rOK"));
+	}
+
+	public void testSmsReceiveSupported_error() throws Exception {
+		// expect
+		assertFalse(d.isSmsReceiveSupported("ERROR"));
+	}
+
 //> TEST SETUP METHODS
 	private InputStream mockInputStream(String string) throws UnsupportedEncodingException {
 		return new ByteArrayInputStream(string.getBytes("UTF-8"));

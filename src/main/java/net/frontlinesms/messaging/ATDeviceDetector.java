@@ -10,6 +10,7 @@ public class ATDeviceDetector extends Thread {
 	private static final String STRIP_REGEX = "(\\s+OK)|" +
 			// RSSI is "received signal strength indicator", and appears to be received unbidden
 			"(\\s+\\^RSSI:\\d+)";
+	private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
 					
 	/** Valid baud rates */
 	private static final int[] BAUD_RATES = { 9600, 14400, 19200, 28800, 33600, 38400, 56000, 57600, 115200, 230400, 460800, 921600 };
@@ -37,6 +38,8 @@ public class ATDeviceDetector extends Thread {
 	private String imsi;
 	private String phoneNumber;
 	private String lockType;
+	private boolean smsReceiveSupported;
+	private boolean smsSendSupported;
 	
 	public ATDeviceDetector(CommPortIdentifier port, ATDeviceDetectorListener listener) {
 		super("ATDeviceDetector: " + port.getName());
@@ -93,6 +96,7 @@ public class ATDeviceDetector extends Thread {
 				model = getModel(in, out);
 				phoneNumber = getPhoneNumber(in, out);
 				lockType = getLockType(in, out);
+				setSmsSupport(in, out);
 			} catch(InterruptedException ex) {
 				log.info("Detection thread interrupted.", ex);
 				this.exceptionMessage = "Detection interrupted.";
@@ -148,6 +152,12 @@ public class ATDeviceDetector extends Thread {
 			}
 		}
 	}
+
+	void setSmsSupport(InputStream in, OutputStream out) throws IOException {
+		String response = Utils.executeAtCommand(in, out, "CSMS?", false);
+		smsReceiveSupported = isSmsReceiveSupported(response);
+		smsSendSupported = isSmsSendSupported(response);
+	}
 	
 	/** @return value or <code>null</code> */
 	String getOptional(InputStream in, OutputStream out, String atCommand) throws IOException {
@@ -157,6 +167,25 @@ public class ATDeviceDetector extends Thread {
 		} else {
 			return response.replaceAll(STRIP_REGEX, "").trim();
 		}
+	}
+
+	/** @return <code>true</code> if mobile-terminated SMS is supported; <code>false</code> otherwise */
+	boolean isSmsReceiveSupported(String atResponse) {
+		return getDigitAsBoolean(atResponse, 1);
+	}
+
+	/** @return <code>true</code> if mobile-originated SMS is supported; <code>false</code> otherwise */
+	boolean isSmsSendSupported(String atResponse) {
+		return getDigitAsBoolean(atResponse, 2);
+	}
+
+	private boolean getDigitAsBoolean(String values, int index) {
+		Matcher m = DIGIT_PATTERN.matcher(values);
+
+		for(int i=0; m.find(); ++i) {
+			if(i == index) return m.group().equals("1");
+		}
+		return false;
 	}
 
 //> ACCESSORS
@@ -213,4 +242,13 @@ public class ATDeviceDetector extends Thread {
 	public String getLockType() {
 		return lockType;
 	}
+
+	public boolean isSmsSendSupported() {
+		return smsSendSupported;
+	}
+
+	public boolean isSmsReceiveSupported() {
+		return smsReceiveSupported;
+	}
 }
+
