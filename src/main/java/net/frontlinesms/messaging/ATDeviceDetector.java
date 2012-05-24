@@ -9,7 +9,9 @@ import serial.*;
 public class ATDeviceDetector extends Thread {
 	private static final String STRIP_REGEX = "(\\s+OK)|" +
 			// RSSI is "received signal strength indicator", and appears to be received unbidden
-			"(\\s+\\^RSSI:\\d+)";
+			"(\\s+\\^RSSI:\\d+)|" +
+			// Don't know what BOOT is, but definitely not part of a device manufacturer ;¬)
+			"(\\^BOOT:\\d+(,\\d+)*)";
 	private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
 					
 	/** Valid baud rates */
@@ -97,6 +99,7 @@ public class ATDeviceDetector extends Thread {
 				phoneNumber = getPhoneNumber(in, out);
 				lockType = getLockType(in, out);
 				setSmsSupport(in, out);
+				imsi = getImsi(in, out);
 			} catch(InterruptedException ex) {
 				log.info("Detection thread interrupted.", ex);
 				this.exceptionMessage = "Detection interrupted.";
@@ -151,6 +154,10 @@ public class ATDeviceDetector extends Thread {
 				return type;
 			}
 		}
+	}
+
+	String getImsi(InputStream in, OutputStream out) throws IOException {
+		return getOptional(in, out, "CIMI");
 	}
 
 	void setSmsSupport(InputStream in, OutputStream out) throws IOException {

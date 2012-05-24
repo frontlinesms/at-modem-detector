@@ -46,13 +46,25 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		// then
 		assertEquals("asdf", response);
 	}
+
+	public void testGetImsi_ok() throws Exception {
+		// given
+		in = mockInputStream("012345678901234\r\nOK");
+
+		// when
+		String response = d.getImsi(in, out);
+
+		// then
+		assertEquals("012345678901234", response);
+	}
 	
 	public void testGetManufacturer() throws Exception {
 		final String[][] testPairs = new String[][] {
 				/* { <modemOutput>, <expectedResponse> } */
 				{ "WAVECOM MODEM\rOK", "WAVECOM MODEM" },
 				{ "huawei\r\n\r\nOK", "huawei" },
-				{ "huawei\r\n\r\nOK\r\n\r\n^RSSI:18", "huawei" },
+				{ "huawei\r\n\r\nOK\r\n\r\n^RSSI:18", "huawei"},
+				{ "huawei\r\n\r\nOK\r\n\r\n^BOOT:9716548,0,0,0,20", "huawei" },
 		};
 		
 		for(String[] pair : testPairs) {
