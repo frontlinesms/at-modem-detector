@@ -73,25 +73,11 @@ public class ATDeviceDetector extends Thread {
 				String response = Utils.readAll(in);
 				if(!Utils.isResponseOk(response)) {
 					throw new ATDeviceDetectionException("Bad response: " + response);
-				} else {
-					Utils.writeCommand(out, "AT+CGSN");
-					response = Utils.readAll(in);
-					if(!Utils.isResponseOk(response)) {
-						throw new ATDeviceDetectionException("Bad response to request for serial number: " + response);
-					} else {
-						String serial = Utils.trimResponse("AT+CGSN", response);
-						log.debug("Found serial: " + serial);
-						if(this.serial != null) {
-							// There was already a serial detected.  Check if it's the same as
-							// what we've just got.
-							if(!this.serial.equals(serial)) {
-								log.info("New serial detected: '" + serial + "'.  Replacing previous: '" + this.serial + "'");
-							}
-						}
-						this.serial = serial;
-						maxBaudRate = Math.max(maxBaudRate, baud);
-					}
 				}
+
+				serial = getSerial(in, out);
+
+				maxBaudRate = Math.max(maxBaudRate, baud);
 				
 				// detection is complete, so let's try and get the device manufacturer, model and phone number
 				manufacturer = getManufacturer(in, out);
@@ -120,6 +106,25 @@ public class ATDeviceDetector extends Thread {
 				"; model: " + model +
 				"; phoneNumber: " + phoneNumber);
 		if(listener != null) listener.handleDetectionCompleted(this);
+	}
+
+	String getSerial(InputStream in, OutputStream out) throws IOException, ATDeviceDetectionException {
+		Utils.writeCommand(out, "AT+CGSN");
+		String response = Utils.readAll(in);
+		if(!Utils.isResponseOk(response)) {
+			throw new ATDeviceDetectionException("Bad response to request for serial number: " + response);
+		} else {
+			String serial = Utils.trimResponse("AT+CGSN", response);
+			log.debug("Found serial: " + serial);
+			if(this.serial != null) {
+				// There was already a serial detected.  Check if it's the same as
+				// what we've just got.
+				if(!this.serial.equals(serial)) {
+					log.info("New serial detected: '" + serial + "'.  Replacing previous: '" + this.serial + "'");
+				}
+			}
+			return serial.replaceAll(STRIP_REGEX, "").trim();
+		}
 	}
 	
 	String getManufacturer(InputStream in, OutputStream out) throws IOException {

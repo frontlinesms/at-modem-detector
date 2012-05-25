@@ -57,7 +57,32 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 		// then
 		assertEquals("012345678901234", response);
 	}
-	
+
+	public void testGetSerial() throws Exception {
+		final String[][] testPairs = new String[][] {
+				/* { <modemOutput>, <expectedResponse> } */
+				{ "123457890\rOK", "123457890" },
+				{ "123457890\r\n\r\nOK", "123457890" },
+				{ "123457890\r\n\r\nOK\r\n\r\n^RSSI:18", "123457890"},
+				{ "123457890\r\n\r\nOK\r\n\r\n^BOOT:9716548,0,0,0,20", "123457890" },
+		};
+
+		for(String[] pair : testPairs) {
+			testGetSerial(pair[0], pair[1]);
+		}
+	}
+
+	private void testGetSerial(String modemOutput, String expectedResponse) throws Exception {
+		// given
+		in = mockInputStream(modemOutput);
+
+		// when
+		String actualResponse = d.getSerial(in, out);
+
+		// then
+		assertEquals(expectedResponse, actualResponse);
+	}
+
 	public void testGetManufacturer() throws Exception {
 		final String[][] testPairs = new String[][] {
 				/* { <modemOutput>, <expectedResponse> } */
