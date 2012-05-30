@@ -90,14 +90,14 @@ public class ATDeviceDetector extends Thread {
 				log.info("Detection thread interrupted.", ex);
 				this.exceptionMessage = "Detection interrupted.";
 				break;
-			} catch(Exception ex) {
-				log.info("Problem connecting to device.", ex);
-				this.exceptionMessage = ex.getMessage();
+			} catch(Throwable t) {
+				log.info("Problem connecting to device.", t);
+				this.exceptionMessage = t.getMessage();
 			} finally {
 				// Close any open streams
-				if(out != null) try { out.close(); } catch(Exception ex) { log.warn("Error closing output stream.", ex); }
-				if(in != null) try { in.close(); } catch(Exception ex) { log.warn("Error closing input stream.", ex); }
-				if(serialPort != null) try { serialPort.close(); } catch(Exception ex) { log.warn("Error closing serial port.", ex); }
+				if(out != null) try { out.close(); } catch(Throwable t) { log.warn("Error closing output stream.", t); }
+				if(in != null) try { in.close(); } catch(Throwable t) { log.warn("Error closing input stream.", t); }
+				// N.B. don't call serialPort.close() here, as it can result in System.exit from JNI on some systems
 			}
 		}
 		finished = true;
