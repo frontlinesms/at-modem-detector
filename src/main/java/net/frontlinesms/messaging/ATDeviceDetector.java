@@ -97,7 +97,9 @@ public class ATDeviceDetector extends Thread {
 				// Close any open streams
 				if(out != null) try { out.close(); } catch(Throwable t) { log.warn("Error closing output stream.", t); }
 				if(in != null) try { in.close(); } catch(Throwable t) { log.warn("Error closing input stream.", t); }
-				// N.B. don't call serialPort.close() here, as it can result in System.exit from JNI on some systems
+				// N.B. apprently serialPort.close() can result in System.exit from JNI on some systems.  However,
+				// without it we cannot connect to ports after detector has run on them
+				if(serialPort != null) try { serialPort.close(); } catch(Throwable t) { log.warn("Error closing input stream.", t); }
 			}
 		}
 		finished = true;
