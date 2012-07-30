@@ -7,11 +7,11 @@ import java.util.regex.Pattern;
 import serial.*;
 
 public class ATDeviceDetector extends Thread {
-	private static final String STRIP_REGEX = "(\\s+OK)|" +
-			// RSSI is "received signal strength indicator", and appears to be received unbidden
-			"(\\s+\\^RSSI:\\d+)|" +
-			// Don't know what BOOT is, but definitely not part of a device manufacturer ;¬)
-			"(\\^BOOT:\\d+(,\\d+)*)";
+	private static final String STRIP_REGEX = "\\s+(" +
+			"(OK)|" +
+			// Should strip all asynchronous info sent by the phone so it doesn't interfere with info we requested
+			"(\\^[A-Z]+:[\\d,]+)" +
+			")";
 	private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
 					
 	/** Valid baud rates */
@@ -117,7 +117,7 @@ public class ATDeviceDetector extends Thread {
 			throw new ATDeviceDetectionException("Bad response to request for serial number: " + response);
 		} else {
 			String serial = Utils.trimResponse("AT+CGSN", response);
-			log.debug("Found serial: " + serial);
+			log.debug("Found serial (before stripping): " + serial);
 			if(this.serial != null) {
 				// There was already a serial detected.  Check if it's the same as
 				// what we've just got.
