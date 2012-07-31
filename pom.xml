@@ -3,7 +3,7 @@
 	<groupId>net.frontlinesms.core</groupId>
 	<artifactId>at-modem-detector</artifactId>
 	<name>AT Modem Detector</name>
-	<version>0.8</version>
+	<version>0.9-SNAPSHOT</version>
 	<description>Automatically detect the presence of AT modems attached to the computer.</description>
 	
 	<scm>
