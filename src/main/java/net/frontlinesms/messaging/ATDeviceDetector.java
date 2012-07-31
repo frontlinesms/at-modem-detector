@@ -15,7 +15,7 @@ public class ATDeviceDetector extends Thread {
 	private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
 					
 	/** Valid baud rates */
-	private static final int[] BAUD_RATES = { 9600, 14400, 19200, 28800, 33600, 38400, 56000, 57600, 115200, 230400, 460800, 921600 };
+	private static final int[] BAUD_RATES = { 9600, 19200, 38400, 57600, 115200 };
 
 	/** Logger */
 	private final Logger log = new Logger(this.getClass());
@@ -57,12 +57,19 @@ public class ATDeviceDetector extends Thread {
 			
 			/* This detection workflow was taken from ComTest in SMSLib, and is licensed under Apache v2. */
 			try {
+				log.info("Opening serial port...");
 				serialPort = portIdentifier.open("ATDeviceDetector", 2000);
+				log.info("Port opened.  Setting flow control mode...");
 				serialPort.setFlowControlMode(SerialPort.FLOWCONTROL_RTSCTS_IN);
+				log.info("Flow control mode set.  Setting port params...");
 				serialPort.setSerialPortParams(baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+				log.info("Port params set.  Opening input stream...");
 				in = serialPort.getInputStream();
+				log.info("Input stram opened.  Opening output stream...");
 				out = serialPort.getOutputStream();
+				log.info("Output stream opened.  Enabling receive timeout...");
 				serialPort.enableReceiveTimeout(1000);
+				log.info("Receive timeout enabled.");
 				
 				log.trace("LOOPING.");
 				
@@ -93,13 +100,21 @@ public class ATDeviceDetector extends Thread {
 			} catch(Throwable t) {
 				log.info("Problem connecting to device.", t);
 				this.exceptionMessage = t.getMessage();
+
+				// Set serial port to null here to avoid JVM death.  Unfortunately this can leave ports
+				// locked, but on balance this seems preferable.
+				serialPort = null;
 			} finally {
 				// Close any open streams
 				if(out != null) try { out.close(); } catch(Throwable t) { log.warn("Error closing output stream.", t); }
 				if(in != null) try { in.close(); } catch(Throwable t) { log.warn("Error closing input stream.", t); }
-				// N.B. apprently serialPort.close() can result in System.exit from JNI on some systems.  However,
-				// without it we cannot connect to ports after detector has run on them
-				if(serialPort != null) try { serialPort.close(); } catch(Throwable t) { log.warn("Error closing input stream.", t); }
+				// N.B. apprently serialPort.close() can result in System.exit from JNI on some systems.  This
+				// appears to be when device is disconnected before detection can be completed.  However,
+				// without it we cannot connect to ports after detector has run on them.  Therefore we should
+				// only call it on ports which have successfully detected.
+				// Failure to call serialPort.close() will leave lock files (`/var/lock/LCK..ttyUSB0` etc.) on
+				// RXTX linux.
+				if(serialPort != null) try { serialPort.close(); } catch(Throwable t) { log.warn("Error closing serial port.", t); }
 			}
 		}
 		finished = true;
