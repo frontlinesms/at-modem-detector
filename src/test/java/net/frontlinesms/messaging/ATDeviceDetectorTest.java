@@ -65,6 +65,7 @@ public class ATDeviceDetectorTest extends BaseTestCase {
 				{ "123457890\r\n\r\nOK", "123457890" },
 				{ "123457890\r\n\r\nOK\r\n\r\n^RSSI:18", "123457890"},
 				{ "123457890\r\n\r\nOK\r\n\r\n^BOOT:9716548,0,0,0,20", "123457890" },
+				{ "85558555\r\n\r\nOK\r\n\r\n+CREG: 1\r\n\r\n+CGREG: 1", "85558555" },
 		};
 
 		for(String[] pair : testPairs) {

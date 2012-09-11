@@ -10,7 +10,8 @@ public class ATDeviceDetector extends Thread {
 	private static final String STRIP_REGEX = "\\s+(" +
 			"(OK)|" +
 			// Should strip all asynchronous info sent by the phone so it doesn't interfere with info we requested
-			"(\\^[A-Z]+:[\\d,]+)" +
+			"(\\^[A-Z]+:[\\d,]+)|" +
+			"(\\+CG?REG: \\d+)" +
 			")";
 	private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
 					
